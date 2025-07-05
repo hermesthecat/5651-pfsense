@@ -9,15 +9,67 @@
 
 require("guiconfig.inc");
 
-if (($_POST['submit'] == "Download") && file_exists($_POST['dlPath'])) {
+if (($_POST['submit'] == "Download") && !empty($_POST['dlPath'])) {
+	// SECURITY: Path traversal protection
+	$requested_path = $_POST['dlPath'];
+	
+	// Define allowed directories
+	$allowed_directories = [
+		'/tmp/',
+		'/var/log/',
+		'/var/tmp/',
+		'/usr/local/www/'
+	];
+	
+	// Normalize the path
+	$real_path = realpath($requested_path);
+	
+	// Check if file exists and path is valid
+	if (!$real_path || !file_exists($real_path)) {
+		echo "ERROR: File not found or invalid path.";
+		exit;
+	}
+	
+	// Check if the real path is within allowed directories
+	$path_allowed = false;
+	foreach ($allowed_directories as $allowed_dir) {
+		if (strpos($real_path, $allowed_dir) === 0) {
+			$path_allowed = true;
+			break;
+		}
+	}
+	
+	if (!$path_allowed) {
+		echo "SECURITY ERROR: Access denied. File path not in allowed directories.\n";
+		echo "Allowed directories: " . implode(', ', $allowed_directories) . "\n";
+		echo "Requested path: " . htmlspecialchars($requested_path) . "\n";
+		exit;
+	}
+	
+	// Additional security check: prevent access to sensitive files
+	$dangerous_files = ['.passwd', '.shadow', 'config.xml', '.htaccess', '.htpasswd'];
+	$filename = basename($real_path);
+	foreach ($dangerous_files as $dangerous_file) {
+		if (strpos($filename, $dangerous_file) !== false) {
+			echo "SECURITY ERROR: Access to sensitive file denied.";
+			exit;
+		}
+	}
+	
 	session_cache_limiter('public');
-	$fd = fopen($_POST['dlPath'], "rb");
+	$fd = fopen($real_path, "rb");
+	if (!$fd) {
+		echo "ERROR: Could not open file.";
+		exit;
+	}
+	
 	header("Content-Type: application/octet-stream");
-	header("Content-Length: " . filesize($_POST['dlPath']));
+	header("Content-Length: " . filesize($real_path));
 	header("Content-Disposition: attachment; filename=\"" .
-		trim(htmlentities(basename($_POST['dlPath']))) . "\"");
+		trim(htmlentities(basename($real_path))) . "\"");
 
 	fpassthru($fd);
+	fclose($fd);
 	exit;
 } else if (($_POST['submit'] == "Upload") && is_uploaded_file($_FILES['ulfile']['tmp_name'])) {
 	move_uploaded_file($_FILES['ulfile']['tmp_name'], "/tmp/" . $_FILES['ulfile']['name']);
