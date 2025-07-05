@@ -7,21 +7,21 @@ Aslında bu ürünü ticari bir kutu haline getirmiştim ama daha sonradan açı
 Neler gerekiyor?
 Öncelikle TİB subnet altında olan ağlarda dağıtılan ip adreslerini belirli bir formatta istemektedir.
 Bu format;
-http://www.tib.gov.tr/dokuman/Ornek_Dahili_IP_Dagitim_Logu.txt
-adresinde belirtildiği şekilde olmalıdır. Eğer bu ip adresleri DHCP sunucu tarafından dağıtılmıyor 
+<http://www.tib.gov.tr/dokuman/Ornek_Dahili_IP_Dagitim_Logu.txt>
+adresinde belirtildiği şekilde olmalıdır. Eğer bu ip adresleri DHCP sunucu tarafından dağıtılmıyor
 statik olarak tanımlanmışsa o zaman el ile tanımlanma yapılmalıdır.
 Bu şekilde hazırlnamış olan dosya;
-http://www.tib.gov.tr/IP_log_imzalayici
+<http://www.tib.gov.tr/IP_log_imzalayici>
 adresinde bulunan zaman damgalayıcı ile damgalanmalı ve bir daha içinde herhangi bir değişiklik
 yapılmamalıdır. Bunun yanında yasaklı olan kelimeleri yasaklayan bir filtreleme sisteminin
 bulundurulması ve kullanıma dahil edilerek yasaklı olan "sex porno" gibi kelimelerin yasaklanması
 istenmektedir.
 
 Çözüm:
-Çözüm olarak pfsense 1.2.3 sürümüne ait 2gb imaj dosyası compact flash üzerine kurularak 
-üzerinde değişiklikler yapıldı. Yazılan uygulamalar ile DHCP sunucunun logları istenen formatta 
-Windows paylaşımı, FTP paylaşımı veyahutta sistem üzerine takılı FAT32 formatlı bir disk 
-(testlerde ben usb kullandım) üzerine aktarılmasını sağlamak. Özellikle windows paylaşımı 
+Çözüm olarak pfsense 1.2.3 sürümüne ait 2gb imaj dosyası compact flash üzerine kurularak
+üzerinde değişiklikler yapıldı. Yazılan uygulamalar ile DHCP sunucunun logları istenen formatta
+Windows paylaşımı, FTP paylaşımı veyahutta sistem üzerine takılı FAT32 formatlı bir disk
+(testlerde ben usb kullandım) üzerine aktarılmasını sağlamak. Özellikle windows paylaşımı
 yerel ağdaki ağlar, FTP ise çoklu ağlar üzerinde tek bir yerden zaman damgası işlemlerini
 yerine getirmek için ideal olacaktır. Windows paylaşım dizinleri ve ftp dizinleri özellike TİB'e
 ait olan zaman damgalama dizini ile eşleştirilirse sorunsuz bir şekilde işler otomatik olmaktadır.
@@ -51,7 +51,6 @@ mount -uw /
 pkg_add -r samba3-smbclient
 
 cp /usr/local/etc/smb-client.conf.sample /usr/local/etc/smb-client.conf
-
 
 Nasıl kullanılır?
 Sunucu kayıtları -> Ayarlar
