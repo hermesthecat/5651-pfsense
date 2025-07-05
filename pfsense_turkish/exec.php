@@ -190,12 +190,55 @@ pre {
 
 if (!isBlank($_POST['txtCommand'])) {
    puts("<pre>");
-   puts("\$ " . htmlspecialchars($_POST['txtCommand']));
-   putenv("PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin");
-   putenv("SCRIPT_FILENAME=" . strtok($_POST['txtCommand'], " "));	/* PHP scripts */
-   $ph = popen($_POST['txtCommand'], "r" );
-   while ($line = fgets($ph)) echo htmlspecialchars($line);
-   pclose($ph);
+   
+   // SECURITY: Input validation and command whitelisting
+   $allowed_commands = [
+       'ps', 'ps aux', 'ps -ef',
+       'netstat', 'netstat -an', 'netstat -rn',
+       'ifconfig', 'ifconfig -a',
+       'df', 'df -h',
+       'free', 'free -h',
+       'uptime',
+       'date',
+       'who', 'w',
+       'top -n 1',
+       'uname', 'uname -a',
+       'ls', 'ls -la',
+       'pwd'
+   ];
+   
+   $command = trim($_POST['txtCommand']);
+   $command_found = false;
+   
+   foreach ($allowed_commands as $allowed_cmd) {
+       if ($command === $allowed_cmd || strpos($command, $allowed_cmd . ' ') === 0) {
+           $command_found = true;
+           break;
+       }
+   }
+   
+   if (!$command_found) {
+       echo "SECURITY ERROR: Command not allowed.\n";
+       echo "Allowed commands: " . implode(', ', $allowed_commands) . "\n";
+       echo "Requested command: " . htmlspecialchars($command) . "\n";
+   } else {
+       puts("\$ " . htmlspecialchars($command));
+       putenv("PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin");
+       
+       // Use escapeshellcmd for additional security
+       $safe_command = escapeshellcmd($command);
+       $ph = popen($safe_command, "r");
+       
+       if ($ph) {
+           while ($line = fgets($ph)) {
+               echo htmlspecialchars($line);
+           }
+           pclose($ph);
+       } else {
+           echo "ERROR: Could not execute command.\n";
+       }
+   }
+   
    puts("</pre>");
 }
 
