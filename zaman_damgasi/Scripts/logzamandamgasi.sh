@@ -32,8 +32,19 @@ openssl=/usr/local/ssl/bin/openssl
 # Imza islemi icin kullanilacak openssl binarysi.
 openssl_conf=/usr/local/ssl/openssl.cnf	# OpenSSL binary'sinin kullanacagi config dosyasi.
 
+# SECURITY: Hardcoded password moved to environment variable
+# Set this environment variable before running the script:
+# export TSA_PRIVATE_KEY_PASSWORD='your_password'
+
+# Check if environment variable is set
+if [ -z "$TSA_PRIVATE_KEY_PASSWORD" ]; then
+    echo "ERROR: TSA private key password not set in environment variable"
+    echo "Please set: TSA_PRIVATE_KEY_PASSWORD"
+    exit 1
+fi
+
 # TSA'ya ait Private Key'in Pass Pharse'i
-password=nevport
+password="$TSA_PRIVATE_KEY_PASSWORD"
 
 #--------------------------------------CALISMA DIZININE KOPYALAMA ISLEMI--------------------------------------#
 
