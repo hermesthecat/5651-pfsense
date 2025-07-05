@@ -29,16 +29,16 @@
 	POSSIBILITY OF SUCH DAMAGE.
 */
 
+// SECURITY: This file has been disabled due to critical command injection vulnerability
+// Original functionality allowed arbitrary command execution via GET parameter
+// If this functionality is needed, implement proper input validation and command whitelisting
 
 header("Content-Type: text/plain");
 include("guiconfig.inc");
 
-putenv("PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin");
-if($_GET['cmd'] == "") {
-	echo "Herhangi bir tanımlama yapılamadı.  Devam edemiyor.";
-	exit;
-}
-passthru($_GET['cmd']);
+echo "Bu dosya güvenlik nedeniyle devre dışı bırakılmıştır.\n";
+echo "Güvenlik açığı: Command Injection via GET parameter\n";
+echo "Detaylar için sistem yöneticinize başvurunuz.\n";
 
-exit(0);
+exit(1);
 ?>

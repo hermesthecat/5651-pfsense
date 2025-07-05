@@ -202,9 +202,11 @@ if (!isBlank($_POST['txtCommand'])) {
 
 if (!isBlank($_POST['txtPHPCommand'])) {
    puts("<pre>");
-   require_once("config.inc");
-   require_once("functions.inc");
-   echo eval($_POST['txtPHPCommand']);
+   // SECURITY: eval() function removed due to PHP code injection vulnerability
+   // This functionality allowed arbitrary PHP code execution
+   echo "PHP command execution has been disabled for security reasons.\n";
+   echo "Security vulnerability: PHP Code Injection via eval()\n";
+   echo "Contact system administrator for alternative solutions.\n";
    puts("</pre>");
 }
 
