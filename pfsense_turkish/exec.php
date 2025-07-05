@@ -72,8 +72,51 @@ if (($_POST['submit'] == "Download") && !empty($_POST['dlPath'])) {
 	fclose($fd);
 	exit;
 } else if (($_POST['submit'] == "Upload") && is_uploaded_file($_FILES['ulfile']['tmp_name'])) {
-	move_uploaded_file($_FILES['ulfile']['tmp_name'], "/tmp/" . $_FILES['ulfile']['name']);
-	$ulmsg = "Uploaded file to /tmp/" . htmlentities($_FILES['ulfile']['name']);
+	// SECURITY: File upload validation
+	$upload_file = $_FILES['ulfile'];
+	$file_name = $upload_file['name'];
+	$file_tmp = $upload_file['tmp_name'];
+	$file_size = $upload_file['size'];
+	$file_error = $upload_file['error'];
+	
+	// Check for upload errors
+	if ($file_error !== UPLOAD_ERR_OK) {
+		$ulmsg = "Upload error: " . $file_error;
+	} else {
+		// File size limit (10MB)
+		$max_file_size = 10 * 1024 * 1024;
+		if ($file_size > $max_file_size) {
+			$ulmsg = "ERROR: File too large. Maximum size: 10MB";
+		} else {
+			// Allowed file extensions
+			$allowed_extensions = ['txt', 'log', 'conf', 'cfg', 'xml', 'json', 'csv'];
+			$file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+			
+			if (!in_array($file_ext, $allowed_extensions)) {
+				$ulmsg = "ERROR: File type not allowed. Allowed types: " . implode(', ', $allowed_extensions);
+			} else {
+				// Sanitize filename
+				$safe_filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $file_name);
+				$safe_filename = substr($safe_filename, 0, 100); // Limit length
+				
+				// Check if file already exists
+				$target_path = "/tmp/" . $safe_filename;
+				if (file_exists($target_path)) {
+					$safe_filename = date('Ymd_His') . '_' . $safe_filename;
+					$target_path = "/tmp/" . $safe_filename;
+				}
+				
+				// Move uploaded file
+				if (move_uploaded_file($file_tmp, $target_path)) {
+					// Set secure permissions
+					chmod($target_path, 0644);
+					$ulmsg = "Uploaded file to /tmp/" . htmlentities($safe_filename);
+				} else {
+					$ulmsg = "ERROR: Failed to move uploaded file.";
+				}
+			}
+		}
+	}
 	unset($_POST['txtCommand']);
 }
 
